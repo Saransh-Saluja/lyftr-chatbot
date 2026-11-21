@@ -36,7 +36,7 @@ class Settings:
         e = os.environ.get
         return cls(
             llm_api_keys=_csv(e("LLM_API_KEYS")),
-            llm_model=e("LLM_MODEL", "gemini/gemini-3.1-flash-lite"),
+            llm_model=e("LLM_MODEL", "gemini/gemini-3.5-flash-lite"),
             llm_api_base=e("LLM_API_BASE") or None,
             database_url=e("DATABASE_URL", "sqlite:///./data/app.db"),
             # A trailing slash is a classic CORS mistake ("https://x.app/" never equals the
