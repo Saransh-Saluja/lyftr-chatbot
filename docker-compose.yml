@@ -1,0 +1,36 @@
+# One command (make up) starts the whole stack. All configuration is via
+# environment variables: compose substitutes ${VARS} from your shell or from the
+# .env file next to this file (copy .env.example to .env).
+services:
+  backend:
+    build: ./backend
+    environment:
+      LLM_API_KEYS: ${LLM_API_KEYS:-replace-with-key-1,replace-with-key-2}
+      LLM_MODEL: ${LLM_MODEL:-gemini/gemini-3.1-flash-lite}
+      LLM_API_BASE: ${LLM_API_BASE:-}
+      DATABASE_URL: sqlite:////data/app.db
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      ENABLE_FAILURE_SIMULATION: ${ENABLE_FAILURE_SIMULATION:-true}
+      DEFAULT_SYSTEM_PROMPT: ${DEFAULT_SYSTEM_PROMPT:-You are a helpful, concise assistant.}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-30}
+      CACHE_TTL_SECONDS: ${CACHE_TTL_SECONDS:-3600}
+    ports:
+      - "8000:8000"
+    volumes:
+      - lyftr_data:/data        # named volume: the SQLite file survives container restarts/rebuilds
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy   # start the UI only once the API reports healthy
+    restart: unless-stopped
+
+volumes:
+  lyftr_data:

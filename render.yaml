@@ -1,0 +1,27 @@
+# Render Blueprint for the BACKEND only (the frontend goes on Vercel).
+# Secrets (sync: false) are never stored in git: Render asks you for them in the dashboard.
+services:
+  - type: web
+    name: lyftr-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore            # closest to India; change if you prefer
+    plan: free                   # FREE = no persistent disk, sleeps after 15 min idle (see DEPLOY.md)
+    healthCheckPath: /health
+    envVars:
+      - key: LLM_API_KEYS
+        sync: false              # paste key1,key2 in the dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false              # your Vercel URL, e.g. https://lyftr-chat.vercel.app (no trailing slash)
+      - key: LLM_MODEL
+        value: gemini/gemini-3.1-flash-lite
+      - key: DATABASE_URL
+        value: sqlite:////data/app.db
+      - key: ENABLE_FAILURE_SIMULATION
+        value: "true"            # the demo needs the X-Simulate-Failure hook
+    # --- To keep history across restarts: change plan to `starter` and uncomment: ---
+    # disk:
+    #   name: lyftr-data
+    #   mountPath: /data
+    #   sizeGB: 1
